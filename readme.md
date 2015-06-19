@@ -1,8 +1,8 @@
-# Gulp-json-sass
+# Gulp-json-scss
 
 > Gulp plugin for turning JSON files into files of scss/sass variable definitions.
 
-*Issues should be reported on the [issue tracker](https://github.com/rbalicki2/gulp-json-sass/issues).*
+*Issues should be reported on the [issue tracker](https://github.com/AndyOGo/gulp-json-sass/issues).*
 
 This JSON file can also be read by your Javascript. This will make it easier to keep your JS code used for layout and your CSS code in sync.
 
@@ -13,7 +13,7 @@ Ignores (passes through) files with a extensions other than `.json`.
 ## Installation
 
 ```sh
-npm install --save gulp-json-sass
+npm install --save gulp-json-scss
 ```
 
 ## Example
@@ -21,7 +21,7 @@ npm install --save gulp-json-sass
 In this example gulpfile, a JSON file is turned into a file of sass variables, concatenated with a sass file, and compiled using `gulp-ruby-sass`.
 
 ```js
-var jsonSass = require('gulp-json-sass'),
+var jsonSass = require('gulp-json-scss'),
     gulp = require('gulp'),
     concat = require('gulp-concat'),
     sass = require('gulp-ruby-sass');
@@ -84,6 +84,20 @@ Type: `boolean`
 Default: `false`
 
 If true, malformed JSON does not result in the plugin emitting an error.
+
+##### emptyKeyFirst
+
+Type: `boolean`
+Default: `true`
+
+If true, empty keys of an object are output first.
+
+##### skipDelimAtEmptyKeys
+
+Type: `boolean`
+Default: `true`
+
+If true, delimiters are only added for keys which are not empty string
 
 ##### escapeIllegalCharacters
 

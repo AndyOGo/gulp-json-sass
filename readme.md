@@ -99,6 +99,13 @@ Default: `true`
 
 If true, delimiters are only added for keys which are not empty string
 
+##### groupRelated
+
+Type: `boolean`
+Default: `true`
+
+If true, it will add an additional newline after each related sass variables
+
 ##### escapeIllegalCharacters
 
 Type: `boolean`  

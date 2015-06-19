@@ -20,6 +20,7 @@ module.exports = function(opt) {
   opt.eol = opt.sass ? '' : ';';
   opt.emptyKeyFirst = opt.emptyKeyFirst === undefined ? true : !!opt.emptyKeyFirst;
   opt.skipDelimAtEmptyKeys = opt.skipDelimAtEmptyKeys === undefined ? true : !!opt.skipDelimAtEmptyKeys;
+  opt.groupRelated = opt.groupRelated === undefined ? true : !!opt.groupRelated;
   opt.ignoreJsonErrors = !!opt.ignoreJsonErrors;
   opt.escapeIllegalCharacters = opt.escapeIllegalCharacters === undefined ? true : opt.escapeIllegalCharacters;
   opt.firstCharacter = opt.firstCharacter || '_';
@@ -57,7 +58,7 @@ module.exports = function(opt) {
       sassVariables.push(assignmentString);
     });
 
-    var sass = sassVariables.join('\n');
+    var sass = sassVariables.join('\n').trimRight();
     file.contents = Buffer(sass);
 
     file.path = gutil.replaceExtension(file.path, opt.sass ? '.sass' : '.scss');
@@ -106,6 +107,10 @@ module.exports = function(opt) {
       cb('$' + path + key + ': ' + val + opt.eol);
     } else {
       loadVariablesRecursive(val, path + key + opt.delim, cb);
+      // group related sass variables by newline
+      if (opt.groupRelated) {
+        cb('');
+      }
     }
   }
 };

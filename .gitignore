@@ -4,3 +4,4 @@ gulpfile.js
 *.sublime-workspace
 .sass-cache/
 .DS_Store
+.idea/

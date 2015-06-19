@@ -1,12 +1,12 @@
 var through = require('through'),
-    chalk = require('chalk'),
-    gulpmatch = require('gulp-match'),
-    path = require('path'),
-    gutil = require('gulp-util');
+  chalk = require('chalk'),
+  gulpmatch = require('gulp-match'),
+  path = require('path'),
+  gutil = require('gulp-util');
 
 // from http://stackoverflow.com/questions/17191265/legal-characters-for-sass-and-scss-variable-names
 var escapableCharactersRegex = /(["!#$%&\'()*+,.\/:;\s<=>?@\[\]^\{\}|~])/g;
-function replaceEscapableCharacters(str) { 
+function replaceEscapableCharacters(str) {
   return str.replace(escapableCharactersRegex, function(a,b) {
     return '\\' + b;
   });
@@ -18,6 +18,8 @@ module.exports = function(opt) {
   opt.delim = opt.delim || '-';
   opt.sass = !!opt.sass;
   opt.eol = opt.sass ? '' : ';';
+  opt.emptyKeyFirst = opt.emptyKeyFirst === undefined ? true : !!opt.emptyKeyFirst;
+  opt.skipDelimAtEmptyKeys = opt.skipDelimAtEmptyKeys === undefined ? true : !!opt.skipDelimAtEmptyKeys;
   opt.ignoreJsonErrors = !!opt.ignoreJsonErrors;
   opt.escapeIllegalCharacters = opt.escapeIllegalCharacters === undefined ? true : opt.escapeIllegalCharacters;
   opt.firstCharacter = opt.firstCharacter || '_';
@@ -40,9 +42,9 @@ module.exports = function(opt) {
       var parsedJSON = JSON.parse(file.contents);
     } catch (e) {
       if (opt.ignoreJsonErrors) {
-        console.log(chalk.red('[gulp-json-sass]') + ' Invalid JSON in ' + file.path + '. (Continuing.)');
+        console.log(chalk.red('[gulp-json-scss]') + ' Invalid JSON in ' + file.path + '. (Continuing.)');
       } else {
-        console.log(chalk.red('[gulp-json-sass]') + ' Invalid JSON in ' + file.path);
+        console.log(chalk.red('[gulp-json-scss]') + ' Invalid JSON in ' + file.path);
         this.emit('error', e);
       }
       return;
@@ -64,27 +66,46 @@ module.exports = function(opt) {
   }
 
   function loadVariablesRecursive(obj, path, cb) {
+    // load empty keys first
+    if(opt.emptyKeyFirst && '' in obj) {
+      processVariable(obj, path, cb, '');
+    }
+
     for (var key in obj) {
       if (obj.hasOwnProperty(key)) {
-        var val = obj[key];
 
-        // escape invalid sass characters
-        if (opt.escapeIllegalCharacters) {
-          key = replaceEscapableCharacters(key);
+        // load empty keys first
+        if(opt.emptyKeyFirst && key === '') {
+          continue;
         }
 
-        // sass variables cannot begin with a number
-        if (path === '' && firstCharacterIsNumber.exec(key) && opt.prefixFirstNumericCharacter) {
-          key = opt.firstCharacter + key;
-        }
-
-        if (typeof val !== 'object') {
-          cb('$' + path + key + ': ' + val + opt.eol);
-        } else {
-          loadVariablesRecursive(val, path + key + opt.delim, cb);
-        }
+        processVariable(obj, path, cb, key);
       }
     }
   }
 
-}
+  function processVariable(obj, path, cb, key) {
+    var val = obj[key];
+
+    // escape invalid sass characters
+    if (opt.escapeIllegalCharacters) {
+      key = replaceEscapableCharacters(key);
+    }
+
+    // sass variables cannot begin with a number
+    if (path === '' && firstCharacterIsNumber.exec(key) && opt.prefixFirstNumericCharacter) {
+      key = opt.firstCharacter + key;
+    }
+
+    // skip delimiters for empty keys
+    if(opt.skipDelimAtEmptyKeys && key === '') {
+      path = path.slice(0, -1);
+    }
+
+    if (typeof val !== 'object') {
+      cb('$' + path + key + ': ' + val + opt.eol);
+    } else {
+      loadVariablesRecursive(val, path + key + opt.delim, cb);
+    }
+  }
+};

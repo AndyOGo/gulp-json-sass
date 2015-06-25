@@ -55,6 +55,14 @@ module.exports = function(opt) {
     var sassVariables = [];
 
     loadVariablesRecursive(parsedJSON, '', function pushVariable(assignmentString) {
+      if(assignmentString === '' && sassVariables[sassVariables.length - 1] === '')
+        return;
+
+      if(typeof opt.interceptor === 'function' && assignmentString !== '') {
+        assignmentString = assignmentString.split(':');
+        assignmentString = opt.interceptor(assignmentString[0], assignmentString[1]);
+      }
+
       sassVariables.push(assignmentString);
     });
 

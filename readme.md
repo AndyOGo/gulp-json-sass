@@ -145,6 +145,13 @@ Default: `_`
 
 What string to use to prefix numeric top-level keys.
 
+##### interceptor
+
+Type: `function`
+Return: `string`
+
+If given, a callback is expected to handle the variable name, and definition. Return a valid SASS/SCSS string.
+
 ## License
 
 MIT.
